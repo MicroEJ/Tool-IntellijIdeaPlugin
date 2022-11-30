@@ -31,6 +31,7 @@ tasks {
 
     patchPluginXml {
         sinceBuild.set("212")
+        untilBuild.set("223.*")
     }
 
     // To be configured to publish the plugin on the Jetbrains marketplace
