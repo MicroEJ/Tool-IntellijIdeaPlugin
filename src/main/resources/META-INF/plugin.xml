@@ -22,7 +22,19 @@
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
     IntelliJ IDEA plugin to create software applications for MicroEJ-ready devices.
+    <br><br>
+
+    Please refer to <a href="https://docs.microej.com/en/feature-microej-sdk-6/SDK6UserGuide/install.html">the documentation</a>
+    for installation instructions and to learn know how to use it.
+    <br><br>
+
+    Need help? Please check <a href="https://forum.microej.com">our forum</a> and post a question.
   ]]></description>
+
+    <change-notes><![CDATA[
+	    <br>0.1.0
+		<br>- Remove the JDK from the project dependencies.
+  ]]></change-notes>
 
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
