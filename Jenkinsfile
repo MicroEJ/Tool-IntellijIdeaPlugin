@@ -1,31 +1,66 @@
-/**
-* Copyright 2021-2022 MicroEJ Corp. All rights reserved.
-* This library is provided in source code for use, modification and test, subject to license terms.
-* Any modification of the source code will break MicroEJ Corp. warranties on the whole library.
-*/
+/*
+ * Groovy
+ *
+ * Copyright 2022 MicroEJ Corp. All rights reserved.
+ * This library is provided in source code for use, modification and test, subject to license terms.
+ * Any modification of the source code will break MicroEJ Corp. warranties on the whole library.
+ */
+pipeline {
+    agent {
+        docker {
+            label 'docker'
+            image 'eclipse-temurin:11'
+            args '-v ${JENKINS_TOOLS_HOME}/common/java-keystore/keystore-public-cross:${JENKINS_TOOLS_HOME}/common/java-keystore/keystore-public-cross'
+        }
+    }
 
-buildWithMMM{
-  //MODULE_DIR = ''				// The name of the project into which your MODULE_FILENAME is. Default value is : '' . So leave blank if your MODULE_FILENAME is in the root of your gitlab project.
-  //MODULE_FILENAME = ''			// The module filename. Default value is : module.ivy. Set it if yours is different.
-  //LABEL = ''					// The label where build must be run. Default value is : docker if in docker build or generic. Set it if yours is different.
-  //DOCKER_IMAGE = ''				// The image used to execute the build. Default value is : microej/sdk:$MMM_VERSION. If empty (set to '') the build is executed without Docker (so directly on the Jenkins node).
-  
-  //MMM_VERSION = ''				// The version of MMM to use. Default value is 5.5.0.
-  //ANT_PROPERTIES = ''			// The properties run with ant. Default value is already set. Add specific properties if necessary. As ('-DnameOfProperties=valueofProperty').
-  //ANT_VERBOSE = ''				// Default value is : false. Set true if you want the verbose mode. 
-  //ARTIFACTS_DOMAIN = ''			// The artifacts domain to use. The default value is cross5.
-  
-  //PATTERN_JUNIT = ''			// The pattern Junit for test report. This default value is : '**/target~/test/xml/**/*test-report.xml, **/target~/test/xml/**/TEST-*.xml'. Set it if you want to use different one.
-  
-  //ENVIRONMENT_VARIABLES = []	// The list of additional environment variables.
-  
-  //DOWNSTREAM_JOBS = [[			// The list of jobs to launch at the last stage of the job. If not set, does nothing.
-  //	name: '',					// The full name of the project to build at the end of the current build. eg: "I0047_Jenkins_example/feature%2FI0047J-51_example_print"
-  //	parameters: [],				// The array of parameters to pass to the downstream job. Default to empty array. eg: [booleanParam(name: 'ANT_VERBOSE', value: true), string(name: 'ANT_PROPERTIES', value: 'this is a test')]
-  //	when: ''					// Condition for running the job. Default to true. eg: env.GIT_BRANCH == "develop"
-  //],[
-  //	name: '',
-  //	parameters: [],
-  //	when: ''
-  //]]
+    stages {
+        stage ('Build') {
+            steps {
+                script {
+                    def branch = env.GIT_BRANCH
+                    // Fetch level
+                    env.fetchLevel = "snapshot"
+                    if(branch.startsWith("maintenance/") || branch.startsWith("release/") ||
+                           branch.startsWith("hotfix/") || branch.equals("origin/master") || branch.equals("master")) {
+                        env.fetchLevel = "release"
+                    }
+                    print("Fetch level : " + fetchLevel)
+                    // Publish level
+                    env.publishLevel = "snapshot"
+                    if(branch.startsWith("release/") || branch.startsWith("hotfix/")|| branch.startsWith("feature/")) {
+                        env.publishLevel = "noPublish"
+                    } else if(branch.startsWith("maintenance/") || branch.equals("origin/master") || branch.equals("master")) {
+                        env.publishLevel = "release"
+                    }
+                    print("Publish level : " + publishLevel)
+                }
+                wrap([$class: 'BuildUser']) {
+                    withCredentials([[$class: 'UsernamePasswordMultiBinding',
+                                        credentialsId: '2f7097bd-af94-4ac1-ba6b-d41788b9b5cf',
+                                        usernameVariable: 'ARTIFACTORY_CROSS_INTEGRATION_USERNAME',
+                                        passwordVariable: 'ARTIFACTORY_CROSS_INTEGRATION_PASSWORD']]) {
+                        sh "./gradlew -I ./ci/microej.init.gradle.kts --info clean build -Djavax.net.ssl.trustStore=${JENKINS_TOOLS_HOME}/common/java-keystore/keystore-public-cross -Dartifactory.cross.username=${ARTIFACTORY_CROSS_INTEGRATION_USERNAME} -Dartifactory.cross.password=${ARTIFACTORY_CROSS_INTEGRATION_PASSWORD} -Duser.id=${env.BUILD_USER_ID} -Dartifacts.fetch.level=${env.fetchLevel}"
+                    }
+                }
+            }
+        }
+        stage ('Publish') {
+            when {
+                expression {
+                    return env.publishLevel != null && env.publishLevel != 'noPublish';
+                }
+            }
+            steps {
+                wrap([$class: 'BuildUser']) {
+                    withCredentials([[$class: 'UsernamePasswordMultiBinding',
+                                        credentialsId: '2f7097bd-af94-4ac1-ba6b-d41788b9b5cf',
+                                        usernameVariable: 'ARTIFACTORY_CROSS_INTEGRATION_USERNAME',
+                                        passwordVariable: 'ARTIFACTORY_CROSS_INTEGRATION_PASSWORD']]) {
+                        sh "./gradlew -I ./ci/microej.init.gradle.kts --info publish -Djavax.net.ssl.trustStore=${JENKINS_TOOLS_HOME}/common/java-keystore/keystore-public-cross -Dartifactory.cross.username=${ARTIFACTORY_CROSS_INTEGRATION_USERNAME} -Dartifactory.cross.password=${ARTIFACTORY_CROSS_INTEGRATION_PASSWORD} -Duser.id=${env.BUILD_USER_ID} -Dartifacts.fetch.level=${env.fetchLevel} -Dartifacts.publish.level=${env.publishLevel}"
+                    }
+                }
+            }
+        }
+    }
 }
