@@ -1,7 +1,7 @@
 <!--
 	XML
 
-	Copyright 2022 MicroEJ Corp. All rights reserved.
+	Copyright 2022-2023 MicroEJ Corp. All rights reserved.
 	This library is provided in source code for use, modification and test, subject to license terms.
 	Any modification of the source code will break MicroEJ Corp. warranties on the whole library.
 -->
@@ -21,7 +21,7 @@
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
-    IntelliJ IDEA plugin to create software applications for MicroEJ-ready devices.
+    IntelliJ IDEA plugin to develop software applications using MICROEJ SDK.
     <br><br>
 
     Please refer to <a href="https://docs.microej.com/en/feature-microej-sdk-6/SDK6UserGuide/install.html">the documentation</a>
