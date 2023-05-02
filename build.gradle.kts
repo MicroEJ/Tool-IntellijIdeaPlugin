@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "com.microej.tools"
-version = "0.2.0"
+version = "0.3.0"
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
 intellij {
@@ -31,7 +31,7 @@ tasks {
 
     patchPluginXml {
         sinceBuild.set("212")
-        untilBuild.set("223.*")
+        untilBuild.set("")
     }
 
     // To be configured to publish the plugin on the Jetbrains marketplace
