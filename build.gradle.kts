@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "com.microej.tools"
-version = "0.3.0-SNAPSHOT"
+version = "0.3.0"
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
 intellij {
