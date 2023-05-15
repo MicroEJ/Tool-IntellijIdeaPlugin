@@ -14,6 +14,10 @@ plugins {
 group = "com.microej.tools"
 version = "0.3.0"
 
+repositories {
+    mavenCentral()
+}
+
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
 intellij {
     version.set("2021.2")
